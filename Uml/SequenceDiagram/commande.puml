@@ -1,0 +1,98 @@
+@startuml
+title Commande - Passage de commande avec contrôle d'authentification
+
+actor "Utilisateur" as U
+participant "IHM\n(Console / Web)" as UI
+participant "Service Authentification" as SA
+participant "Service Utilisateur" as SU
+participant "Service Panier" as SP
+participant "Service Commande" as SCO
+participant "Service Client" as SCL
+database "Base de données" as DB
+
+U -> UI : Passer commande
+activate UI
+
+UI -> SA : estAuthentifie()
+activate SA
+SA --> UI : oui/non
+deactivate SA
+
+alt Utilisateur non authentifié
+  UI --> U : Demander création de compte / connexion
+
+  U -> UI : Saisir login + mot de passe (création)
+  UI -> SU : creerCompte(login, motDePasse)
+  activate SU
+  SU -> DB : INSERT utilisateur
+  activate DB
+  DB --> SU : ok
+  deactivate DB
+  SU --> UI : compteCréé
+  deactivate SU
+
+  UI -> SA : authentifier(login, motDePasse)
+  activate SA
+  SA -> DB : SELECT utilisateur WHERE login=?
+  activate DB
+  DB --> SA : utilisateur + hash
+  deactivate DB
+  SA --> UI : sessionOuverte
+  deactivate SA
+else Utilisateur authentifié
+  UI --> U : Continuer le checkout
+end
+
+UI -> SP : obtenirPanierCourant()
+activate SP
+SP -> DB : SELECT panier + lignes
+activate DB
+DB --> SP : panier (lignes)
+deactivate DB
+SP --> UI : panier
+deactivate SP
+
+alt Panier vide
+  UI --> U : Refuser commande (panier vide)
+  deactivate UI
+else Panier non vide
+  UI --> U : Saisir informations client
+  U -> UI : nom, prénom, email, adresse, téléphone
+
+  UI -> SCL : enregistrerClient(infosClient)
+  activate SCL
+  SCL -> DB : INSERT client
+  activate DB
+  DB --> SCL : clientId
+  deactivate DB
+  SCL --> UI : clientId
+  deactivate SCL
+
+  UI -> SCO : creerCommande(utilisateur, clientId, lignesPanier)
+  activate SCO
+  SCO -> DB : INSERT commande
+  activate DB
+  DB --> SCO : commandeId
+  deactivate DB
+
+  SCO -> DB : INSERT lignesCommande (1..n)
+  activate DB
+  DB --> SCO : ok
+  deactivate DB
+
+  SCO -> SP : viderPanier()
+  activate SP
+  SP -> DB : DELETE lignesPanier
+  activate DB
+  DB --> SP : ok
+  deactivate DB
+  SP --> SCO : ok
+  deactivate SP
+
+  SCO --> UI : commandeConfirmée(commandeId)
+  deactivate SCO
+
+  UI --> U : Afficher confirmation (commandeId)
+  deactivate UI
+end
+@enduml
