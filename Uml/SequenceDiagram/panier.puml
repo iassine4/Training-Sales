@@ -1,0 +1,66 @@
+@startuml
+title Panier - Ajouter / Retirer / Visualiser
+
+actor "Utilisateur\n(non connecté)" as U
+participant "IHM\n(Console / Web)" as UI
+participant "Service Panier" as SP
+participant "Service Catalogue" as SC
+database "Base de données" as DB
+
+U -> UI : Ouvrir le panier
+activate UI
+UI -> SP : obtenirPanierCourant()
+activate SP
+SP -> DB : SELECT panier + lignes
+activate DB
+DB --> SP : panier
+deactivate DB
+SP --> UI : panier
+deactivate SP
+
+loop Ajouter une ou plusieurs formations
+  U -> UI : Ajouter formation(formationId)
+  UI -> SC : verifierFormationExiste(formationId)
+  activate SC
+  SC -> DB : SELECT formation WHERE id=?
+  activate DB
+  DB --> SC : formation (ok)
+  deactivate DB
+  SC --> UI : ok
+  deactivate SC
+
+  UI -> SP : ajouterAuPanier(formationId, quantite=1)
+  activate SP
+  SP -> DB : INSERT/UPDATE lignePanier
+  activate DB
+  DB --> SP : ok
+  deactivate DB
+  SP --> UI : panierMisAJour
+  deactivate SP
+end
+
+opt Retirer une formation
+  U -> UI : Retirer formation(formationId)
+  UI -> SP : retirerDuPanier(formationId)
+  activate SP
+  SP -> DB : DELETE/UPDATE lignePanier
+  activate DB
+  DB --> SP : ok
+  deactivate DB
+  SP --> UI : panierMisAJour
+  deactivate SP
+end
+
+U -> UI : Visualiser le panier
+UI -> SP : obtenirPanierCourant()
+activate SP
+SP -> DB : SELECT panier + lignes
+activate DB
+DB --> SP : panier
+deactivate DB
+SP --> UI : panier
+deactivate SP
+
+UI --> U : Afficher panier
+deactivate UI
+@enduml
