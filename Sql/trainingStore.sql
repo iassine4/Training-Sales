@@ -12,14 +12,6 @@ CREATE DATABASE IF NOT EXISTS training_store
 USE training_store;
 
 -- =====================================================
--- UTILISATEUR SQL RESTREINT (optionnel mais recommandé)
--- =====================================================
-DROP USER IF EXISTS 'training_app'@'localhost';
-CREATE USER 'training_app'@'localhost' IDENTIFIED BY 'training_app_pwd';
-GRANT SELECT, INSERT, UPDATE, DELETE ON training_store.* TO 'training_app'@'localhost';
-FLUSH PRIVILEGES;
-
--- =====================================================
 -- TABLE : CATEGORY
 -- Une catégorie peut contenir plusieurs formations
 -- =====================================================
