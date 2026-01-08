@@ -22,7 +22,7 @@ public class CatalogDaoTest {
 	        System.out.println("\n=== TRAININGS (REMOTE) ===");
 	        trainingDao.findByModality(Modality.REMOTE).forEach(System.out::println);
 
-	        System.out.println("\n=== TRAININGS (keyword='java') ===");
+	        System.out.println("\n=== TRAININGS (keyword='sq') ===");
 	        trainingDao.searchByKeyword("sq").forEach(System.out::println);
 
 	}
