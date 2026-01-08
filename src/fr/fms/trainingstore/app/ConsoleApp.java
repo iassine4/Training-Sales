@@ -122,6 +122,7 @@ public class ConsoleApp {
             System.out.print(prompt);
             String line = scanner.nextLine();
             try {
+            	//converti la chaîne en int
                 return Integer.parseInt(line.trim());
             } catch (NumberFormatException e) {
                 System.out.println("Veuillez saisir un nombre.");
